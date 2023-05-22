@@ -7,7 +7,7 @@ const bodyParser = require("body-parser");
 const jsonParser = bodyParser.json(); // parse application/json
 const urlencodedParser = bodyParser.urlencoded({ extended: false }); // parse application/x-www-form-urlencoded
 
-// Conexión a MongoDB
+// connect to MongoDB
 const dbConnect = require("./connection/dbConnect");
 dbConnect();
 
@@ -15,11 +15,11 @@ dbConnect();
 app.use(jsonParser);
 app.use(urlencodedParser);
 
-// Rutas
+// Routes
 const authRouter = require("./routes/authRoute");
 app.use("/api/user", jsonParser, authRouter);
 
-// Iniciar el servidor
+// Start the server
 app.listen(PORT, () => {
   console.log(`Server running! Port: ${PORT}`);
 });
