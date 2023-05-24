@@ -1,13 +1,15 @@
 const notFound = (req, res, next) => {
-  const err = new Error(`Not found : ${req.originalUrl}`);
+  const error = new Error(`Not Found : ${req.originalUrl}`);
   res.status(404);
-  next(err);
+  next(error);
 };
 
 // Handler
 const errorHandler = (err, req, res, next) => {
-  const status = res.statusCode == 200 ? 500 : res.statusCode;
-  res.status(status).json({
+  const statuscode = res.statusCode == 200 ? 500 : res.statusCode;
+  res.status(statuscode);
+  res.json({
+    status: statuscode,
     message: err?.message,
     stack: err?.stack,
   });
