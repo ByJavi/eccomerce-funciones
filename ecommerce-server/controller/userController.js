@@ -12,4 +12,13 @@ const createUser = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { createUser };
+const getAllUsers = asyncHandler(async (req, res) => {
+  try {
+    const getUsers = await User.find();
+    res.json(getUsers);
+  } catch (error) {
+    throw new Error(error);
+  }
+});
+
+module.exports = { createUser, getAllUsers };
