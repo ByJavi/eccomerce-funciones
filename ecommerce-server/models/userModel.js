@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 const crypto = require("crypto");
-const { SHA256 } = require("crypto-js");
 
 const userSchema = new mongoose.Schema(
   {
@@ -55,6 +55,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Hash the password before saving
 userSchema.pre("save", async function (next) {
   // Check if the password field is modified
   if (!this.isModified("password")) {
@@ -62,40 +63,32 @@ userSchema.pre("save", async function (next) {
     return;
   }
 
-  // Generate a salt
-  const salt = await crypto.randomBytes(10).toString("hex");
-
-  // Hash the password with the salt
-  const hashedPassword = SHA256(this.password + salt).toString();
-
-  // Set the hashed password as the new password
-  this.password = hashedPassword;
+  // Generate a salt and hash the password
+  const salt = await bcrypt.genSaltSync(10);
+  this.password = await bcrypt.hash(this.password, salt);
 
   next();
 });
 
-userSchema.methods.isPasswordMatched = function (enteredPassword) {
-  // Extract the salt from the stored password
-  const salt = this.password.slice(0, 20);
-
-  // Hash the entered password with the salt
-  const hashedPassword = SHA256(enteredPassword + salt).toString();
-
-  // Compare the hashed password with the stored password
-  return this.password === hashedPassword;
+// Compare entered password with stored password
+userSchema.methods.isPasswordMatched = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
 };
 
-userSchema.methods.createPasswordResetToken = function () {
+// Create a password reset token
+userSchema.methods.createPasswordResetToken = async function () {
   // Generate a random token
   const resetToken = crypto.randomBytes(32).toString("hex");
 
-  // Set the password reset token
-  this.passwordResetToken = SHA256(resetToken).toString();
+  // Hash the reset token
+  this.passwordResetToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
 
   // Set the expiration time for the password reset token (30 minutes from now)
   this.passwordResetExpires = Date.now() + 30 * 60 * 1000;
 
-  // Return the reset token
   return resetToken;
 };
 
