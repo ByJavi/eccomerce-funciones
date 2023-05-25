@@ -1,3 +1,4 @@
+const genToken = require("../connection/jwToken");
 const User = require("../models/userModel");
 const asyncHandler = require("express-async-handler");
 
@@ -24,7 +25,14 @@ const loginUser = asyncHandler(async (req, res) => {
   // Check if the user exists and the password matches
   if (findUser && (await findUser.isPasswordMatched(password))) {
     // Send the user data as the response
-    res.json(findUser);
+    res.json({
+      _id: findUser?.id,
+      first_name: findUser?.first_name,
+      last_name: findUser?.last_name,
+      email: findUser?.email,
+      mobile: findUser?.mobile,
+      token: genToken(findUser?.id),
+    });
   } else {
     // Throw an error if the password or email is incorrect
     throw new Error("Incorrect password or email!");
