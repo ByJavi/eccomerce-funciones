@@ -41,6 +41,11 @@ const loginUser = asyncHandler(async (req, res) => {
 
 const getAllUsers = asyncHandler(async (req, res) => {
   try {
+    if (req.user.role !== 'admin') {
+      // Si el usuario no tiene el rol de administrador, retorna un error de autorización
+      return res.status(403).json({ error: 'No tienes permiso para acceder a estos datos.' });
+    }
+
     // Retrieve all users
     const getUsers = await User.find();
     res.json(getUsers);
